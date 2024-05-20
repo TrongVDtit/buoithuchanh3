@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .calculator {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        input {
+            margin: 10px 0;
+            padding: 10px;
+            width: calc(100% - 22px);
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .result {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Simple Calculator</h2>
+        <input type="number" id="a" placeholder="Enter number a">
+        <input type="number" id="b" placeholder="Enter number b">
+        <button onclick="calculate()">Submit</button>
+        <div class="results">
+            <div class="result" id="addResult"></div>
+            <div class="result" id="subtractResult"></div>
+            <div class="result" id="multiplyResult"></div>
+            <div class="result" id="divideResult"></div>
+        </div>
+    </div>
+    <script>
+        async function calculate() {
+            const a = document.getElementById('a').value;
+            const b = document.getElementById('b').value;
+
+            if (a === '' || b === '') {
+                alert('Please enter both numbers.');
+                return;
+            }
+
+            const urls = [
+                '/add',
+                '/subtract',
+                '/multiply',
+                '/divide'
+            ];
+
+            const promises = urls.map(url => 
+                fetch('http://localhost:3000' + url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ a: parseFloat(a), b: parseFloat(b) })
+                }).then(response => response.json())
+            );
+
+            const results = await Promise.all(promises);
+
+            document.getElementById('addResult').innerText = 'Addition Result: ' + results[0].result;
+            document.getElementById('subtractResult').innerText = 'Subtraction Result: ' + results[1].result;
+            document.getElementById('multiplyResult').innerText = 'Multiplication Result: ' + results[2].result;
+            document.getElementById('divideResult').innerText = results[3].error ? 'Error: ' + results[3].error : 'Division Result: ' + results[3].result;
+        }
+    </script>
+</body>
+</html>
